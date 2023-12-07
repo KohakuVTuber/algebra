@@ -8,77 +8,86 @@ y las soluciones son las razones de estos determinantes respecto al determinante
 """
 
 
-# Calcular el determinante de una matriz cuadrada
-def determinante(matriz):
-    # Dimensión de una matriz
+# Definir una función que calcule el menor de una matriz dado sus índices i y j
+def menor(matriz, i, j):
+    # Obtenemos el numero de filas de la matriz
     n = len(matriz)
-    # Verificar si la matriz es de tamaño 1x1
+
+    # Creamos una lista para almacenar el menor
+    menor_matriz = []
+
+    # Iteramos para crear el menor
+    for k in range(n):
+        if k != i:
+            menor_matriz.append([])
+            for l in range(n):
+                if l != j:
+                    menor_matriz[-1].append(matriz[k][l])
+
+    return menor_matriz
+
+
+# Definimos la funcion que calcula los cofactores de una matriz
+def cofactor(matriz, i, j):
+    # Obtenemos el numero de filas de la matriz
+    n = len(matriz)
+
+    # Calculamos el menor de la matriz
+    menor_matriz = menor(matriz, i, j)
+
+    # Calculamos el cofactor
+    cofactor_matriz = (-1) ** (i + j) * determinante(menor_matriz)
+
+    return cofactor_matriz
+
+
+# Definimos la funcion que calcula la determinante de una matriz
+def determinante(matriz):
+    # Obtenemos el numero de filas de la matriz
+    n = len(matriz)
+
+    # Verificamos si la matriz es de tamaño 1x1
     if n == 1:
-        # Retorna el único elemento de la matriz
+        # Retornamos el único elemento de la matriz
         return matriz[0][0]
-    # Verifica si la matriz es de tamaño 2x2
     elif n == 2:
-        # Calcula y retonar el determinante de la matriz
         return matriz[0][0] * matriz[1][1] - matriz[0][1] * matriz[1][0]
     else:
         det = 0
-        # Itera sobre la primera fila de la matriz
         for i in range(n):
-            # Acumula el determinante
-            det += ((-1) ** i) * matriz[0][i] * determinante(submatriz(matriz, 0, i))
+            det += ((-1) ** i) * matriz[0][i] * determinante(menor(matriz, 0, i))
         return det
 
 
-# Define la función submatriz
-def submatriz(matriz, fila, columna):
-    return [
-        # Crea una nueva fila
-        fila[:columna] + fila[columna + 1 :]
-        # Itera sobre las filas de la matriz original
-        for fila in (matriz[:fila] + matriz[fila + i])
-    ]
+# Definimos la función para resolver un sistema de ecuaciones lineales mediante la regla de Cramer
+def resolver_sistema_cramer(coeficientes, constantes):
+    # Obtenemos el tamaño del sistema
+    n = len(coeficientes)
 
-
-# Define la función de resolver por el sistema de acuaciones
-def resolver_sistema(ecuaciones):
-    # Obtiene el número de ecuaciones en el sistema y lo almacena
-    n = len(ecuaciones)
-    # Contiene las filas de las ecuaciones, excluyendo el último elemento de cada fila
-    coeficientes = [fila[:-1] for fila in ecuaciones]
-    # Contiene el último elemento de cada fila de las ecuaciones
-    resultados = [fila[-1] for fila in ecuaciones]
-    # Calcular el determinante del sistema principal
+    # Calculamos el determinante principal
     det_principal = determinante(coeficientes)
 
-    # Verifica si el determinante principal es igual a cero
+    # Verificamos si el determinante es cero
     if det_principal == 0:
-        print("La matriz no tiene solución única")
-        return None
-    # Almacena las soluciones del sistema
+        raise ValueError("El sistema no tiene solución única (determinante igual a cero).")
+
+    # Inicializamos una lista para almacenar las soluciones
     soluciones = []
 
-    # Itera sobre todas las variables del sistema
+    # Iteramos sobre las variables del sistema
     for i in range(n):
-        # Crear una copia del sistema original
-        sistema_temporal = [fila[:] for fila in coeficientes]
-        # Itera sobre todas las filas del sistema
+        # Creamos una copia de la matriz de coeficientes para no modificar la original
+        matriz_temporal = [fila[:] for fila in coeficientes]
+
+        # Reemplazamos la columna i con la columna de constantes
         for j in range(n):
-            # Reemplazar la columna i con la columna de resultados
-            sistema_temporal[j][i] = resultados[j]
-        # Calcular el determinante del sistema temporal
-        det_temporal = determinante(sistema_temporal)
-        # Calcula la solución para la variable i
-        solucion_i = det_temporal / det_principal
-        # Agrega la solución al final de la lista de soluciones
+            matriz_temporal[j][i] = constantes[j]
+
+        # Calculamos el determinante para esta configuración
+        det_actual = determinante(matriz_temporal)
+
+        # Calculamos la solución usando la regla de Cramer
+        solucion_i = det_actual / det_principal
         soluciones.append(solucion_i)
 
-    # Retorna la lista de soluciones después del calculo
     return soluciones
-
-    # Verifica si la lista de soluciones no está vacía
-    if soluciones:
-        print("Soluciones del sistema:")
-        # Itera sobre la lista de soluciones
-        for i, solucion in enumarate(soluciones):
-            # Imprime cada solución junto con su variable
-            print(f"x{i+1} = {solucion}")
