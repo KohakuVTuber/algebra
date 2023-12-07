@@ -63,22 +63,22 @@ def inversa_adjunta(matriz):
     # Obtenemos el numero de filas de la matriz
     n = len(matriz)
 
-    # Calculamos el determinante de la matriz
-    det = determinante(matriz)
-
-    # Verificamos si la matriz tiene inversa
-    if det == 0:
-        print("La matriz no tiene inversa.")
-        return None
-
-    # Calculamos la matriz adjunta
+    # Creamos una matriz para almacenar la matriz adjunta
     adjunta = []
+
+    # Calculamos los cofactores y los almacenamos en la matriz adjunta
     for i in range(n):
-        adjunta.append([])
+        fila_adjunta = []
         for j in range(n):
-            adjunta[i].append(cofactor(matriz, j, i))
+            cof = cofactor(matriz, i, j)
+            fila_adjunta.append(cof)
+            adjunta.append(fila_adjunta)
+
+    # Transponemos la matriz adjunta
+    adjunta_transpuesta = [list(row) for row in zip(*adjunta)]
+    return adjunta_transpuesta
 
     # Calculamos la inversa multiplicando la matriz adjunta por el inverso del determinante
-    inversa = [[adjunta[i][j] / det for j in range(n)] for i in range(n)]
+    inversa = [[adjunta_transpuesta[i][j] / determinante(matriz) for j in range(n)] for i in range(n)]
 
     return inversa
